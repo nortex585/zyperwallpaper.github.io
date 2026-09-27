@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="tr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zyper Wallpaper | Pure OLED 2K HD Platform</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        oled: '#000000',
+                        glass: '#09090b',
+                        glassBorder: '#27272a',
+                        accent: '#6366f1',
+                        accentGlow: '#4f46e5'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        body {
+            background-color: #000000;
+            color: #f4f4f5;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Custom OLED Dark Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #000000;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #27272a;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #3f3f46;
+        }
+
+        /* Glassmorphic Panel Effects */
+        .glass-panel {
+            background-color: rgba(9, 9, 11, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(39, 39, 42, 0.7);
+        }
+
+        .glass-card {
+            background-color: rgba(12, 12, 15, 0.9);
+            border: 1px solid rgba(39, 39, 42, 0.6);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-card:hover {
+            border-color: rgba(99, 102, 241, 0.6);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px -10px rgba(99, 102, 241, 0.25);
+        }
+
+        .glow-text {
+            text-shadow: 0 0 20px rgba(99, 102, 241, 0.5);
+        }
+
+        /* Modal backdrop animation */
+        .modal-enter {
+            opacity: 0;
+            transform: scale(0.96);
+        }
+        .modal-active {
+            opacity: 1;
+            transform: scale(1);
+            transition: opacity 0.25s ease-out, transform 0.25s ease-out;
+        }
+
+        /* Custom pulsing realtime status badge */
+        .pulse-dot {
+            box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+            animation: pulse-green 2s infinite;
+        }
+        @keyframes pulse-green {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(34, 197, 94, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+        }
+    </style>
+</head>
+<body class="bg-black text-zinc-100 min-h-screen flex flex-col selection:bg-indigo-600 selection:text-white">
+
+    <!-- Top Navigation Bar -->
+    <header class="sticky top-0 z-40 glass-panel border-b border-zinc-800/80 px-4 lg:px-8 py-3.5">
+        <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+            
+            <!-- Brand Logo -->
+            <div class="flex items-center gap-3 cursor-pointer" onclick="resetFilters()">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 via-purple-600 to-pink-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                    <i class="fa-solid font-bold fa-bolt text-white text-xl"></i>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h1 class="font-extrabold text-xl tracking-tight text-white glow-text">Zyper Wallpaper</h1>
+                        <span class="bg-indigo-500/20 text-indigo-400 text-[10px] font-bold px-2 py-0.5 rounded-full border border-indigo-500/30">2K HD</span>
+                    </div>
+                    <p class="text-xs text-zinc-400 font-medium hidden sm:block">Pure OLED Dark Wallpaper Platform</p>
+                </div>
+            </div>
+
+            <!-- Stats & Live Counter Badge -->
+            <div class="hidden md:flex items-center gap-3 bg-zinc-900/90 border border-zinc-800 px-3.5 py-1.5 rounded-full text-xs text-zinc-300">
+                <div class="flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 pulse-dot"></span>
+                    <span class="text-zinc-400">Canlı Bağlantı</span>
+                </div>
+                <div class="h-3 w-px bg-zinc-700"></div>
+                <div>
+                    <span class="text-zinc-400">Toplam:</span> 
+                    <strong id="stat-total-count" class="text-indigo-400 font-semibold">0</strong>
+                </div>
+            </div>
+
+            <!-- Header Action Button -->
+            <div class="flex items-center gap-3">
+                <button onclick="openUploadModal()" class="flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-semibold text-sm px-4 py-2.5 rounded-xl shadow-lg shadow-indigo-600/25 hover:shadow-indigo-600/40 transition-all duration-200 active:scale-95">
+                    <i class="fa-solid fa-cloud-arrow-up text-base"></i>
+                    <span>Wallpaper Yükle</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Wrapper -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 lg:px-8 py-6 flex flex-col gap-6">
+        
+        <!-- Controls & Filters Section -->
+        <section class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 bg-zinc-950/70 border border-zinc-900 p-4 rounded-2xl">
+            
+            <!-- Search Bar -->
+            <div class="relative flex-grow max-w-md">
+                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500 text-sm"></i>
+                <input type="text" id="search-input" oninput="applyFilters()" placeholder="Zyper Wallpaper'da ara (başlık veya etiket)..." class="w-full bg-zinc-900/80 border border-zinc-800 text-zinc-200 placeholder-zinc-500 text-sm rounded-xl pl-10 pr-4 py-2.5 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition">
+            </div>
+
+            <div class="flex flex-wrap items-center gap-3">
+                
+                <!-- Category Filter (EXACTLY TWO: Anime & Klasik + Tümü) -->
+                <div class="flex items-center bg-zinc-900/90 p-1 rounded-xl border border-zinc-800">
+                    <button onclick="setCategoryFilter('all')" id="cat-btn-all" class="cat-btn active font-medium text-xs px-3.5 py-1.5 rounded-lg transition bg-indigo-600 text-white shadow">
+                        Tümü
+                    </button>
+                    <button onclick="setCategoryFilter('Anime')" id="cat-btn-anime" class="cat-btn font-medium text-xs px-3.5 py-1.5 rounded-lg text-zinc-400 hover:text-white transition">
+                        <i class="fa-solid fa-wand-magic-sparkles text-pink-400 mr-1"></i> Anime
+                    </button>
+                    <button onclick="setCategoryFilter('Klasik')" id="cat-btn-klasik" class="cat-btn font-medium text-xs px-3.5 py-1.5 rounded-lg text-zinc-400 hover:text-white transition">
+                        <i class="fa-solid fa-mountain-sun text-amber-400 mr-1"></i> Klasik
+                    </button>
+                </div>
+
+                <!-- Device Filter Tab (PC vs Mobile) -->
+                <div class="flex items-center bg-zinc-900/90 p-1 rounded-xl border border-zinc-800">
+                    <button onclick="setDeviceFilter('all')" id="dev-btn-all" class="dev-btn active font-medium text-xs px-3.5 py-1.5 rounded-lg transition bg-indigo-600 text-white shadow">
+                        Tüm Cihazlar
+                    </button>
+                    <button onclick="setDeviceFilter('PC')" id="dev-btn-pc" class="dev-btn font-medium text-xs px-3.5 py-1.5 rounded-lg text-zinc-400 hover:text-white transition">
+                        <i class="fa-solid fa-desktop mr-1"></i> Masaüstü (PC)
+                    </button>
+                    <button onclick="setDeviceFilter('Mobile')" id="dev-btn-mobile" class="dev-btn font-medium text-xs px-3.5 py-1.5 rounded-lg text-zinc-400 hover:text-white transition">
+                        <i class="fa-solid fa-mobile-screen-button mr-1"></i> Telefon (Mobile)
+                    </button>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Gallery Grid Container -->
+        <section id="gallery-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 min-h-[350px]">
+            <!-- JS dynamically populates items here -->
+        </section>
+
+        <!-- Empty State -->
+        <div id="empty-state" class="hidden flex-col items-center justify-center py-20 text-center bg-zinc-950/40 rounded-3xl border border-dashed border-zinc-800/80">
+            <div class="w-16 h-16 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-500 mb-4 text-2xl">
+                <i class="fa-solid fa-image"></i>
+            </div>
+            <h3 class="text-lg font-bold text-zinc-200">Henüz Duvar Kağıdı Bulunamadı</h3>
+            <p class="text-sm text-zinc-400 max-w-md mt-1 mb-5">Aradığınız kriterlere uygun wallpaper yüklenmemiş veya veritabanı boş olabilir.</p>
+            <div class="flex items-center gap-3">
+                <button onclick="openUploadModal()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-xs px-4 py-2.5 rounded-xl transition">
+                    İlk Wallpaper'ı Yükle
+                </button>
+                <button onclick="loadSampleSeedData()" class="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-medium text-xs px-4 py-2.5 rounded-xl transition border border-zinc-700">
+                    <i class="fa-solid fa-database mr-1.5"></i> Örnek Galeriyi Yükle
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Wallpaper Upload Modal (HTML5 Canvas 2K Compression Engine) -->
+    <div id="upload-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md hidden opacity-0 transition-opacity duration-200">
+        <div class="glass-panel w-full max-w-lg rounded-2xl border border-zinc-800 p-6 shadow-2xl relative flex flex-col gap-5 max-h-[90vh] overflow-y-auto">
+            
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between border-b border-zinc-800 pb-4">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-lg bg-indigo-600/20 text-indigo-400 flex items-center justify-center border border-indigo-500/30">
+                        <i class="fa-solid fa-arrow-up-from-bracket text-sm"></i>
+                    </div>
+                    <div>
+                        <h2 class="font-bold text-base text-white">Zyper Wallpaper Yükle</h2>
+                        <p class="text-xs text-zinc-400">2K HD Otomatik Sıkıştırma Destekli</p>
+                    </div>
+                </div>
+                <button onclick="closeUploadModal()" class="text-zinc-400 hover:text-white text-lg w-8 h-8 rounded-lg hover:bg-zinc-800 flex items-center justify-center transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Form Body -->
+            <form id="upload-form" onsubmit="handleUploadSubmit(event)" class="flex flex-col gap-4">
+                
+                <!-- Title Input -->
+                <div>
+                    <label class="block text-xs font-semibold text-zinc-300 mb-1.5">Wallpaper Başlığı</label>
+                    <input type="text" id="up-title" required placeholder="Örn: Neon Cyber Samurai" class="w-full bg-zinc-900 border border-zinc-800 text-zinc-100 rounded-xl px-3.5 py-2 text-sm focus:outline-none focus:border-indigo-500">
+                </div>
+
+                <!-- Category Radio (Anime vs Klasik) -->
+                <div>
+                    <label class="block text-xs font-semibold text-zinc-300 mb-1.5">Kategori Seçimi</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <label class="flex items-center gap-2.5 bg-zinc-900 border border-zinc-800 p-3 rounded-xl cursor-pointer hover:border-zinc-700 transition">
+                            <input type="radio" name="up-category" value="Anime" checked class="accent-indigo-600">
+                            <span class="text-xs font-medium text-zinc-200"><i class="fa-solid fa-wand-magic-sparkles text-pink-400 mr-1"></i> Anime</span>
+                        </label>
+                        <label class="flex items-center gap-2.5 bg-zinc-900 border border-zinc-800 p-3 rounded-xl cursor-pointer hover:border-zinc-700 transition">
+                            <input type="radio" name="up-category" value="Klasik" class="accent-indigo-600">
+                            <span class="text-xs font-medium text-zinc-200"><i class="fa-solid fa-mountain-sun text-amber-400 mr-1"></i> Klasik</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Device Separation (Masaüstü vs Telefon) -->
+                <div>
+                    <label class="block text-xs font-semibold text-zinc-300 mb-1.5">Cihaz Tipi</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <label class="flex items-center gap-2.5 bg-zinc-900 border border-zinc-800 p-3 rounded-xl cursor-pointer hover:border-zinc-700 transition">
+                            <input type="radio" name="up-device" value="PC" checked class="accent-indigo-600">
+                            <span class="text-xs font-medium text-zinc-200"><i class="fa-solid fa-desktop text-indigo-400 mr-1"></i> Masaüstü (PC)</span>
+                        </label>
+                        <label class="flex items-center gap-2.5 bg-zinc-900 border border-zinc-800 p-3 rounded-xl cursor-pointer hover:border-zinc-700 transition">
+                            <input type="radio" name="up-device" value="Mobile" class="accent-indigo-600">
+                            <span class="text-xs font-medium text-zinc-200"><i class="fa-solid fa-mobile-screen-button text-purple-400 mr-1"></i> Telefon (Mobile)</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Source Mode Selector (File Drag & Drop vs Direct URL) -->
+                <div>
+                    <div class="flex items-center justify-between mb-1.5">
+                        <label class="text-xs font-semibold text-zinc-300">Resim Kaynağı</label>
+                        <div class="flex items-center gap-2 text-[11px]">
+                            <button type="button" onclick="setUploadSourceMode('file')" id="source-btn-file" class="text-indigo-400 underline font-medium">Cihazdan Yükle</button>
+                            <span class="text-zinc-600">•</span>
+                            <button type="button" onclick="setUploadSourceMode('url')" id="source-btn-url" class="text-zinc-400 hover:text-zinc-200">URL Bağlantısı</button>
+                        </div>
+                    </div>
+
+                    <!-- File Drag Drop Dropzone -->
+                    <div id="dropzone-area" class="border-2 border-dashed border-zinc-800 hover:border-indigo-500/80 bg-zinc-900/50 rounded-2xl p-6 text-center cursor-pointer transition group">
+                        <input type="file" id="up-file-input" accept="image/*" class="hidden" onchange="handleFileSelect(event)">
+                        <div onclick="document.getElementById('up-file-input').click()" class="flex flex-col items-center justify-center gap-2">
+                            <div class="w-12 h-12 rounded-xl bg-zinc-800 group-hover:bg-indigo-600/20 text-zinc-400 group-hover:text-indigo-400 flex items-center justify-center transition">
+                                <i class="fa-solid fa-cloud-arrow-up text-xl"></i>
+                            </div>
+                            <p class="text-xs font-medium text-zinc-300">Resim Dosyasını Sürükleyin veya <span class="text-indigo-400 underline">Gözatın</span></p>
+                            <p class="text-[10px] text-zinc-500">Otomatik Canvas 2K (max 2560px, 0.92 JPEG) sıkıştırması uygulanır</p>
+                        </div>
+                    </div>
+
+                    <!-- URL Input Box (Hidden by default) -->
+                    <div id="url-area" class="hidden">
+                        <input type="url" id="up-url-input" placeholder="https://images.unsplash.com/photo-..." class="w-full bg-zinc-900 border border-zinc-800 text-zinc-100 rounded-xl px-3.5 py-2 text-sm focus:outline-none focus:border-indigo-500">
+                    </div>
+                </div>
+
+                <!-- Image Live Preview Info Box -->
+                <div id="upload-preview-box" class="hidden bg-zinc-900/90 border border-zinc-800 p-3 rounded-xl flex items-center gap-3">
+                    <img id="preview-img-thumb" src="" class="w-14 h-14 object-cover rounded-lg border border-zinc-700">
+                    <div class="flex-grow min-w-0">
+                        <p id="preview-filename" class="text-xs font-semibold text-zinc-200 truncate">resim.jpg</p>
+                        <p id="preview-dims" class="text-[11px] text-indigo-400 mt-0.5">2560 x 1440 (2K HD Optimized)</p>
+                    </div>
+                    <button type="button" onclick="clearSelectedFile()" class="text-zinc-500 hover:text-red-400 p-2">
+                        <i class="fa-solid fa-trash-can text-sm"></i>
+                    </button>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" id="btn-submit-upload" class="w-full mt-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-semibold text-sm py-3 rounded-xl shadow-lg transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-check"></i>
+                    <span>Veritabanına Kaydet</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Fullscreen Lightbox Modal -->
+    <div id="lightbox-modal" class="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl hidden flex-col transition-all duration-300">
+        
+        <!-- Lightbox Top Control Bar -->
+        <div class="flex items-center justify-between px-6 py-4 border-b border-zinc-900 bg-black/80">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-xl bg-indigo-600/20 text-indigo-400 flex items-center justify-center border border-indigo-500/30">
+                    <i class="fa-solid fa-expand text-sm"></i>
+                </div>
+                <div>
+                    <h3 id="lb-title" class="text-sm font-bold text-white truncate max-w-xs sm:max-w-md">Wallpaper Başlığı</h3>
+                    <div class="flex items-center gap-2 text-[11px] text-zinc-400">
+                        <span id="lb-category-badge" class="px-2 py-0.5 rounded bg-zinc-800 text-zinc-300 font-medium">Anime</span>
+                        <span>•</span>
+                        <span id="lb-device-badge" class="text-indigo-400"><i class="fa-solid fa-desktop mr-1"></i> Masaüstü</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Prominent Close Button (✕) -->
+            <button onclick="closeLightbox()" title="Kapat (ESC)" class="w-11 h-11 rounded-xl bg-zinc-900 border border-zinc-800 hover:bg-red-600/20 hover:border-red-500/50 hover:text-red-400 text-zinc-300 flex items-center justify-center text-xl transition active:scale-95 shadow-lg">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <!-- Lightbox Central Image Stage -->
+        <div class="flex-grow relative flex items-center justify-center p-4 sm:p-8 overflow-hidden select-none">
+            <img id="lb-image" src="" alt="Zyper Wallpaper Preview" class="max-h-[78vh] max-w-full object-contain rounded-xl border border-zinc-800/60 shadow-2xl transition-transform duration-300">
+        </div>
+
+        <!-- Lightbox Bottom Action Bar -->
+        <div class="p-4 sm:p-6 border-t border-zinc-900 bg-black/90 flex flex-wrap items-center justify-between gap-4 max-w-7xl mx-auto w-full">
+            <div class="flex items-center gap-2 text-xs text-zinc-400">
+                <span class="bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-2.5 py-1 rounded-lg font-semibold">
+                    <i class="fa-solid fa-crown mr-1"></i> Zyper Wallpaper 2K HD
+                </span>
+                <span id="lb-res-tag" class="text-zinc-500 hidden sm:inline">2560 x 1440</span>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <!-- Delete Button -->
+                <button id="lb-btn-delete" onclick="deleteCurrentWallpaper()" title="Veritabanından Sil" class="bg-zinc-900 hover:bg-red-950 hover:text-red-400 text-zinc-400 border border-zinc-800 hover:border-red-800 px-3.5 py-2 rounded-xl text-xs font-semibold transition">
+                    <i class="fa-solid fa-trash-can mr-1.5"></i> Sil
+                </button>
+
+                <!-- Copy Link Button -->
+                <button onclick="copyCurrentWallpaperLink()" class="bg-zinc-900 hover:bg-zinc-800 text-zinc-200 border border-zinc-800 px-4 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-2">
+                    <i class="fa-regular fa-copy text-indigo-400"></i>
+                    <span>Linki Kopyala</span>
+                </button>
+
+                <!-- Download Button -->
+                <button onclick="downloadCurrentWallpaper()" class="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-semibold text-xs px-5 py-2 rounded-xl shadow-lg transition flex items-center gap-2">
+                    <i class="fa-solid fa-download"></i>
+                    <span>İndir</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification Banner -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getDatabase, ref, onValue, push, set, remove } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+
+        // Required Firebase Configuration with specified Database URL
+        const firebaseConfig = {
+            databaseURL: "https://ozeltag-default-rtdb.firebaseio.com"
+        };
+
+        // Initialize Firebase App & Realtime Database
+        const app = initializeApp(firebaseConfig);
+        const realtimeDb = getDatabase(app);
+
+        // State Variables
+        let wallpapersList = [];
+        let activeCategory = 'all'; // 'all', 'Anime', 'Klasik'
+        let activeDevice = 'all';   // 'all', 'PC', 'Mobile'
+        let currentLightboxItem = null;
+        let compressedDataUrl = null;
+        let uploadSourceMode = 'file'; // 'file' or 'url'
+
+        // Expose helper functions globally
+        window.realtimeDb = realtimeDb;
+        window.ref = ref;
+
+        // Listen for Realtime Updates from `/Resimler`
+        const resimlerRef = ref(realtimeDb, 'Resimler');
+        
+        onValue(resimlerRef, (snapshot) => {
+            const data = snapshot.val();
+            wallpapersList = [];
+            if (data) {
+                Object.keys(data).forEach(key => {
+                    wallpapersList.push({
+                        id: key,
+                        ...data[key]
+                    });
+                });
+                // Sort by timestamp newest first
+                wallpapersList.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+            }
+            updateStatsCounter();
+            renderGallery();
+        }, (error) => {
+            console.error("Firebase Realtime Database Hatası:", error);
+            showToast("Veritabanı bağlantı hatası!", "error");
+        });
+
+        // Render Wallpapers to Grid Gallery
+        window.renderGallery = function() {
+            const container = document.getElementById('gallery-container');
+            const emptyState = document.getElementById('empty-state');
+            const searchQuery = (document.getElementById('search-input').value || '').toLowerCase().trim();
+
+            let filtered = wallpapersList.filter(item => {
+                // Category match (EXACTLY Anime vs Klasik)
+                if (activeCategory !== 'all' && item.category !== activeCategory) return false;
+                // Device match (PC vs Mobile)
+                if (activeDevice !== 'all' && item.device !== activeDevice) return false;
+                // Search query
+                if (searchQuery) {
+                    const titleMatch = (item.title || '').toLowerCase().includes(searchQuery);
+                    const catMatch = (item.category || '').toLowerCase().includes(searchQuery);
+                    if (!titleMatch && !catMatch) return false;
+                }
+                return true;
+            });
+
+            if (filtered.length === 0) {
+                container.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                emptyState.classList.add('flex');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+            emptyState.classList.remove('flex');
+
+            container.innerHTML = filtered.map(item => {
+                const isMobile = item.device === 'Mobile';
+                const deviceIcon = isMobile ? 'fa-mobile-screen-button' : 'fa-desktop';
+                const deviceLabel = isMobile ? 'Telefon' : 'Masaüstü';
+                const catColor = item.category === 'Anime' ? 'text-pink-400 bg-pink-500/10 border-pink-500/20' : 'text-amber-400 bg-amber-500/10 border-amber-500/20';
+
+                return `
+                    <div onclick="openLightbox('${item.id}')" class="glass-card group relative rounded-2xl overflow-hidden cursor-pointer flex flex-col">
+                        <!-- Image Wrapper with Aspect Ratio -->
+                        <div class="relative w-full ${isMobile ? 'aspect-[9/16]' : 'aspect-video'} bg-zinc-950 overflow-hidden">
+                            <img src="${item.url}" alt="${escapeHtml(item.title)}" loading="lazy" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                            
+                            <!-- Top Badges -->
+                            <div class="absolute top-3 left-3 right-3 flex items-center justify-between pointer-events-none">
+                                <span class="text-[10px] font-bold px-2.5 py-1 rounded-lg border backdrop-blur-md ${catColor}">
+                                    ${item.category || 'Klasik'}
+                                </span>
+                                <span class="text-[10px] font-bold px-2.5 py-1 rounded-lg border border-zinc-700/80 bg-black/60 backdrop-blur-md text-zinc-300 flex items-center gap-1">
+                                    <i class="fa-solid ${deviceIcon}"></i> ${deviceLabel}
+                                </span>
+                            </div>
+
+                            <!-- Hover Overlay -->
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs text-indigo-300 font-semibold flex items-center gap-1">
+                                        <i class="fa-solid fa-expand"></i> Büyüt & İndir
+                                    </span>
+                                    <span class="text-[10px] bg-indigo-600 text-white font-bold px-2 py-0.5 rounded">2K HD</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card Footer -->
+                        <div class="p-3.5 bg-zinc-950/90 flex items-center justify-between gap-2 border-t border-zinc-900">
+                            <h4 class="text-xs font-bold text-zinc-200 truncate flex-grow">${escapeHtml(item.title)}</h4>
+                            <span class="text-[10px] text-zinc-500">${item.date || 'Zyper'}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        };
+
+        // Compress Image using HTML5 Canvas to 2K resolution (max 2560px) with 0.92 JPEG quality
+        window.compressImage = function(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const maxDim = 2560;
+                        let width = img.width;
+                        let height = img.height;
+
+                        if (width > maxDim || height > maxDim) {
+                            if (width > height) {
+                                height = Math.round((height * maxDim) / width);
+                                width = maxDim;
+                            } else {
+                                width = Math.round((width * maxDim) / height);
+                                height = maxDim;
+                            }
+                        }
+
+                        const canvas = document.createElement('canvas');
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.imageSmoothingEnabled = true;
+                        ctx.imageSmoothingQuality = 'high';
+                        ctx.drawImage(img, 0, 0, width, height);
+
+                        const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
+                        resolve({
+                            dataUrl,
+                            width,
+                            height,
+                            originalWidth: img.width,
+                            originalHeight: img.height
+                        });
+                    };
+                    img.onerror = reject;
+                    img.src = e.target.result;
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        };
+
+        // Handle File Selection
+        window.handleFileSelect = async function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            showToast("Canvas 2K optimizasyonu yapılıyor...", "info");
+            try {
+                const compressed = await compressImage(file);
+                compressedDataUrl = compressed.dataUrl;
+
+                document.getElementById('preview-img-thumb').src = compressedDataUrl;
+                document.getElementById('preview-filename').textContent = file.name;
+                document.getElementById('preview-dims').textContent = `${compressed.width} x ${compressed.height} (2K HD Compressed)`;
+                
+                document.getElementById('upload-preview-box').classList.remove('hidden');
+                document.getElementById('dropzone-area').classList.add('hidden');
+            } catch (err) {
+                console.error("Görsel işleme hatası:", err);
+                showToast("Görsel işlenirken bir hata oluştu.", "error");
+            }
+        };
+
+        window.clearSelectedFile = function() {
+            compressedDataUrl = null;
+            document.getElementById('up-file-input').value = '';
+            document.getElementById('upload-preview-box').classList.add('hidden');
+            document.getElementById('dropzone-area').classList.remove('hidden');
+        };
+
+        window.setUploadSourceMode = function(mode) {
+            uploadSourceMode = mode;
+            if (mode === 'file') {
+                document.getElementById('dropzone-area').classList.remove('hidden');
+                document.getElementById('url-area').classList.add('hidden');
+                document.getElementById('source-btn-file').className = "text-indigo-400 underline font-medium";
+                document.getElementById('source-btn-url').className = "text-zinc-400 hover:text-zinc-200";
+            } else {
+                document.getElementById('dropzone-area').classList.add('hidden');
+                document.getElementById('upload-preview-box').classList.add('hidden');
+                document.getElementById('url-area').classList.remove('hidden');
+                document.getElementById('source-btn-url').className = "text-indigo-400 underline font-medium";
+                document.getElementById('source-btn-file').className = "text-zinc-400 hover:text-zinc-200";
+            }
+        };
+
+        // Submit New Wallpaper to Database
+        window.handleUploadSubmit = async function(event) {
+            event.preventDefault();
+
+            const title = document.getElementById('up-title').value.trim();
+            const category = document.querySelector('input[name="up-category"]:checked').value; // 'Anime' or 'Klasik'
+            const device = document.querySelector('input[name="up-device"]:checked').value; // 'PC' or 'Mobile'
+
+            let finalImageUrl = '';
+
+            if (uploadSourceMode === 'file') {
+                if (!compressedDataUrl) {
+                    showToast("Lütfen bir resim dosyası seçin!", "error");
+                    return;
+                }
+                finalImageUrl = compressedDataUrl;
+            } else {
+                const urlVal = document.getElementById('up-url-input').value.trim();
+                if (!urlVal) {
+                    showToast("Lütfen geçerli bir URL girin!", "error");
+                    return;
+                }
+                finalImageUrl = urlVal;
+            }
+
+            const btn = document.getElementById('btn-submit-upload');
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>Yükleniyor...</span>`;
+
+            try {
+                const newRef = push(ref(realtimeDb, 'Resimler'));
+                await set(newRef, {
+                    title: title || 'Zyper Wallpaper',
+                    category: category,
+                    device: device,
+                    url: finalImageUrl,
+                    createdAt: Date.now(),
+                    date: new Date().toLocaleDateString('tr-TR')
+                });
+
+                showToast("Zyper Wallpaper başarıyla yüklendi!", "success");
+                closeUploadModal();
+            } catch (err) {
+                console.error("Yükleme hatası:", err);
+                showToast("Yükleme sırasında hata oluştu!", "error");
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<i class="fa-solid fa-check"></i> <span>Veritabanına Kaydet</span>`;
+            }
+        };
+
+        // Open Fullscreen Lightbox Modal
+        window.openLightbox = function(id) {
+            const item = wallpapersList.find(w => w.id === id);
+            if (!item) return;
+
+            currentLightboxItem = item;
+            document.getElementById('lb-title').textContent = item.title;
+            document.getElementById('lb-image').src = item.url;
+            document.getElementById('lb-category-badge').textContent = item.category || 'Klasik';
+            document.getElementById('lb-device-badge').innerHTML = item.device === 'Mobile' ? 
+                `<i class="fa-solid fa-mobile-screen-button mr-1"></i> Telefon (Mobile)` : 
+                `<i class="fa-solid fa-desktop mr-1"></i> Masaüstü (PC)`;
+
+            const modal = document.getElementById('lightbox-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        };
+
+        window.closeLightbox = function() {
+            const modal = document.getElementById('lightbox-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            currentLightboxItem = null;
+        };
+
+        // Copy Link
+        window.copyCurrentWallpaperLink = function() {
+            if (!currentLightboxItem) return;
+            const link = currentLightboxItem.url;
+
+            // Using standard clipboard logic
+            const tempInput = document.createElement("input");
+            tempInput.value = link;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand("copy");
+            document.body.removeChild(tempInput);
+
+            showToast("Görsel bağlantısı kopyalandı!", "success");
+        };
+
+        // Download Wallpaper
+        window.downloadCurrentWallpaper = function() {
+            if (!currentLightboxItem) return;
+            const a = document.createElement('a');
+            a.href = currentLightboxItem.url;
+            a.download = `Zyper_Wallpaper_${currentLightboxItem.title.replace(/\s+/g, '_')}.jpg`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            showToast("İndirme başlatıldı!", "success");
+        };
+
+        // Delete Wallpaper from Realtime DB
+        window.deleteCurrentWallpaper = async function() {
+            if (!currentLightboxItem) return;
+            if (!confirm("Bu duvar kağıdını silmek istediğinize emin misiniz?")) return;
+
+            try {
+                await remove(ref(realtimeDb, `Resimler/${currentLightboxItem.id}`));
+                showToast("Duvar kağıdı silindi.", "info");
+                closeLightbox();
+            } catch (err) {
+                console.error("Silme hatası:", err);
+                showToast("Silinirken hata oluştu.", "error");
+            }
+        };
+
+        // Category Filter Setters
+        window.setCategoryFilter = function(cat) {
+            activeCategory = cat;
+            document.querySelectorAll('.cat-btn').forEach(b => {
+                b.className = "cat-btn font-medium text-xs px-3.5 py-1.5 rounded-lg text-zinc-400 hover:text-white transition";
+            });
+            const btnId = cat === 'all' ? 'cat-btn-all' : (cat === 'Anime' ? 'cat-btn-anime' : 'cat-btn-klasik');
+            document.getElementById(btnId).className = "cat-btn active font-medium text-xs px-3.5 py-1.5 rounded-lg transition bg-indigo-600 text-white shadow";
+            renderGallery();
+        };
+
+        // Device Filter Setters
+        window.setDeviceFilter = function(dev) {
+            activeDevice = dev;
+            document.querySelectorAll('.dev-btn').forEach(b => {
+                b.className = "dev-btn font-medium text-xs px-3.5 py-1.5 rounded-lg text-zinc-400 hover:text-white transition";
+            });
+            const btnId = dev === 'all' ? 'dev-btn-all' : (dev === 'PC' ? 'dev-btn-pc' : 'dev-btn-mobile');
+            document.getElementById(btnId).className = "dev-btn active font-medium text-xs px-3.5 py-1.5 rounded-lg transition bg-indigo-600 text-white shadow";
+            renderGallery();
+        };
+
+        window.applyFilters = function() {
+            renderGallery();
+        };
+
+        window.resetFilters = function() {
+            document.getElementById('search-input').value = '';
+            setCategoryFilter('all');
+            setDeviceFilter('all');
+        };
+
+        // Modal Toggles
+        window.openUploadModal = function() {
+            const modal = document.getElementById('upload-modal');
+            modal.classList.remove('hidden');
+            setTimeout(() => modal.classList.remove('opacity-0'), 10);
+        };
+
+        window.closeUploadModal = function() {
+            const modal = document.getElementById('upload-modal');
+            modal.classList.add('opacity-0');
+            setTimeout(() => modal.classList.add('hidden'), 200);
+            clearSelectedFile();
+            document.getElementById('upload-form').reset();
+        };
+
+        // Stats Update
+        function updateStatsCounter() {
+            document.getElementById('stat-total-count').textContent = wallpapersList.length;
+        }
+
+        // Seed Sample Wallpapers if DB is Empty
+        window.loadSampleSeedData = async function() {
+            const samples = [
+                {
+                    title: 'Zyper Cyberpunk Neon Samurai',
+                    category: 'Anime',
+                    device: 'PC',
+                    url: 'https://images.unsplash.com/photo-1578632767115-351597cf2477?q=80&w=2560&auto=format&fit=crop',
+                    createdAt: Date.now() - 10000,
+                    date: new Date().toLocaleDateString('tr-TR')
+                },
+                {
+                    title: 'Zyper OLED Minimal Horizon',
+                    category: 'Klasik',
+                    device: 'PC',
+                    url: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=2560&auto=format&fit=crop',
+                    createdAt: Date.now() - 8000,
+                    date: new Date().toLocaleDateString('tr-TR')
+                },
+                {
+                    title: 'Zyper Anime Tokyo Nights',
+                    category: 'Anime',
+                    device: 'Mobile',
+                    url: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?q=80&w=1440&auto=format&fit=crop',
+                    createdAt: Date.now() - 5000,
+                    date: new Date().toLocaleDateString('tr-TR')
+                },
+                {
+                    title: 'Zyper Dark Geometric Gold',
+                    category: 'Klasik',
+                    device: 'Mobile',
+                    url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1440&auto=format&fit=crop',
+                    createdAt: Date.now() - 2000,
+                    date: new Date().toLocaleDateString('tr-TR')
+                }
+            ];
+
+            for (const sample of samples) {
+                const newRef = push(ref(realtimeDb, 'Resimler'));
+                await set(newRef, sample);
+            }
+            showToast("Örnek 2K duvar kağıtları yüklendi!", "success");
+        };
+
+        // Utility: Toast Messenger
+        window.showToast = function(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            let bgClass = 'bg-zinc-900 border-zinc-700 text-zinc-100';
+            let icon = 'fa-circle-info text-indigo-400';
+
+            if (type === 'success') {
+                bgClass = 'bg-zinc-900 border-emerald-500/50 text-white';
+                icon = 'fa-circle-check text-emerald-400';
+            } else if (type === 'error') {
+                bgClass = 'bg-zinc-900 border-red-500/50 text-white';
+                icon = 'fa-circle-xmark text-red-400';
+            }
+
+            toast.className = `flex items-center gap-2.5 ${bgClass} border px-4 py-3 rounded-xl shadow-2xl text-xs font-semibold backdrop-blur-md transition-all duration-300 transform translate-y-2 opacity-0 pointer-events-auto`;
+            toast.innerHTML = `<i class="fa-solid ${icon} text-sm"></i> <span>${escapeHtml(message)}</span>`;
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            }, 10);
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        };
+
+        function escapeHtml(str) {
+            return String(str || '').replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+        }
+
+        // Global ESC key event for lightbox close
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeLightbox();
+                closeUploadModal();
+            }
+        });
+    </script>
+</body>
+</html>
